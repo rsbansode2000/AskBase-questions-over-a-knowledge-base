@@ -6,7 +6,7 @@ A modern **Flask + LangChain + Ollama Retrieval-Augmented Generation (RAG)** app
 
 ## Application Preview
 
-![Company Q&A Assistant](screenshots/chat-demo.png)
+<img width="950" height="674" alt="Screenshot 2026-09-10 115639" src="https://github.com/user-attachments/assets/848c6b5d-7c10-4ef6-a2f8-fe2f2fe64547" />
 
 ---
 
@@ -125,11 +125,6 @@ Company-QA-Assistant/
 11. **Gemma 2B** generates answers based only on retrieved context.
 
 ---
-
-# Sample Chat Experience Look Like This
-
-<img width="950" height="674" alt="Screenshot 2026-09-10 115639" src="https://github.com/user-attachments/assets/848c6b5d-7c10-4ef6-a2f8-fe2f2fe64547" />
-
 
 ---
 
