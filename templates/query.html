@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% block title %}Chat with AI | Company Q&A Assistant{% endblock %}
+{% block content %}
+<section class="chat-page">
+  <div class="container chat-container">
+    <div class="d-flex flex-wrap justify-content-between align-items-end gap-3 mb-4">
+      <div><span class="eyebrow">KNOWLEDGE ASSISTANT</span><h1>Ask your document.</h1><p class="mb-0">Answers are generated only from your active knowledge base.</p></div>
+      <div class="chat-actions d-flex gap-2"><button class="btn btn-outline-dark btn-sm" id="new-chat" type="button"><i class="bi bi-plus-lg"></i> New chat</button><button class="btn btn-outline-danger btn-sm" id="delete-chat" type="button"><i class="bi bi-trash3"></i> Delete chat</button></div>
+      <span class="ready-badge {% if not status.embedded %}not-ready{% endif %}" id="ready-badge"><i class="bi bi-circle-fill"></i> {{ status.embedding_status }}</span>
+    </div>
+    <div class="knowledge-strip">
+      <div><span>Current knowledge base</span><strong id="document-name">{{ status.file_name or 'No document uploaded' }}</strong></div>
+      <div><span>Chunks</span><strong id="chunk-count">{{ status.chunk_count or '—' }}</strong></div>
+      <div><span>Embedding model</span><strong>{{ status.embedding_model }}</strong></div>
+      <div><span>Last uploaded</span><strong>{{ status.uploaded_at or '—' }}</strong></div>
+    </div>
+    <div class="chat-card">
+      <div class="chat-window" id="chat-window">
+        {% if history %}
+          {% for item in history %}
+            <article class="message user"><span class="message-label">You · {{ item.timestamp }}</span><div class="message-body"><div class="message-bubble">{{ item.question }}</div></div></article>
+            <article class="message assistant"><span class="message-label">Assistant · {{ item.timestamp }}</span><div class="message-body"><div class="message-bubble">{{ item.answer }}</div>{% if item.sources %}<div class="sources">{% for source in item.sources %}<div><i class="bi bi-file-earmark-text"></i> {{ source.document }} · Page {{ source.page }} · Chunk {{ source.chunk }} · Confidence {{ source.confidence }}</div>{% endfor %}</div>{% endif %}</div></article>
+          {% endfor %}
+        {% elif status.embedded %}
+          <div class="empty-chat" id="empty-chat"><i class="bi bi-stars"></i><h3>What would you like to know?</h3><p>Ask about the contents of your uploaded document.</p></div>
+        {% else %}
+          <div class="empty-chat" id="empty-chat"><i class="bi bi-file-earmark-plus"></i><h3>Your knowledge base is empty</h3><p>Ask an admin to upload a PDF and generate embeddings before chatting.</p><a class="btn btn-primary mt-2" href="{{ url_for('admin_upload') }}"><i class="bi bi-cloud-arrow-up"></i> Upload a PDF</a></div>
+        {% endif %}
+      </div>
+      <form class="question-form" id="question-form">
+        <input id="question-input" type="text" placeholder="Type your question here..." autocomplete="off" {% if not status.embedded %}disabled{% endif %}>
+        <button class="send-button" type="submit" {% if not status.embedded %}disabled{% endif %}><i class="bi bi-arrow-up"></i></button>
+      </form>
+      <div class="chat-hint">{% if status.embedded %}<i class="bi bi-stars"></i> Retrieved sources will appear below every answer.{% else %}<i class="bi bi-lock"></i> Chat is disabled until an admin uploads and embeds a PDF.{% endif %}</div>
+    </div>
+  </div>
+</section>
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='query.js') }}"></script>{% endblock %}
