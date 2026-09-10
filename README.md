@@ -1,73 +1,223 @@
 # Company Q&A Assistant
 
-A Flask Retrieval-Augmented Generation application for asking questions about one active company PDF.
+A modern **Flask + LangChain + Ollama Retrieval-Augmented Generation (RAG)** application that allows users to ask questions about company documents. The application automatically generates embeddings for uploaded PDFs, stores them in **ChromaDB**, and answers questions using **Gemma 2B** with semantic search.
 
-## Architecture
+---
 
-- `app.py`: Flask routes, demo admin session, upload policy, and chat history.
-- `rag/loader.py`: `PyPDFLoader` page-aware PDF extraction.
-- `rag/splitter.py`: `RecursiveCharacterTextSplitter` chunking.
-- `rag/embeddings.py`: `OllamaEmbeddings(model="nomic-embed-text")`.
-- `rag/vectorstore.py`: persistent `Chroma` collection lifecycle and `metadata.json`.
-- `rag/chat.py`: k=3 similarity retrieval and `ChatOllama(model="gemma:2b")` answers.
-- `templates/`: Bootstrap 5 public, chat, login, dashboard, upload, and error pages.
-- `static/`: responsive CSS and chat/upload JavaScript.
+## Application Preview
 
-## Sample chat experience
+![Company Q&A Assistant](screenshots/chat-demo.png)
 
-The chat page shows the active knowledge base, embedding model, chunk count, and upload time above the conversation. Each answer includes the source pages and chunks used to generate it.
+---
 
-| Current knowledge base | Chunks | Embedding model | Last uploaded |
-| --- | ---: | --- | --- |
-| `SQL.pdf` | 96 | `nomic-embed-text` | `2026-09-10 11:01` |
+## Features
 
-> **You · 11:55**  
-> explain select query
+- 🤖 AI-powered Question & Answer system
+- 📄 Upload company PDF documents
+- 🔍 Semantic Search using Chroma Vector Database
+- 🧠 Retrieval-Augmented Generation (RAG)
+- ⚡ Ollama Embeddings (`nomic-embed-text`)
+- 💬 Chat interface similar to ChatGPT
+- 📚 Source page and chunk references
+- 📊 Confidence score for retrieved context
+- 🔐 Admin Dashboard
+- 📱 Fully responsive Bootstrap 5 UI
+- ♻️ Automatic embedding reuse using SHA-256 hash comparison
+- 🗂️ Persistent Chroma Vector Database
+- 🚀 Fast document retrieval
 
-> **Assistant · 11:55**  
-> Sure, here's the answer to your question:
-> 
-> **What is Query Optimization?**  
-> Query optimization is a technique used to improve the execution speed of database queries by optimizing the execution plan.
-> 
-> **What is the Difference Between Stored Procedure and Function in SQL?**  
-> A stored procedure is a pre-compiled query stored in the database, while a function is a reusable block of SQL code that can be called multiple times.
-> 
-> **What is Nested Query?**  
-> A nested query is a query written inside another query to retrieve data based on the result of the inner query.
+---
 
-_Retrieved sources appear below every answer, including the document name, page, chunk, and confidence score._
+# Project Architecture
 
-## Setup
+```
+                        Admin Uploads PDF
+                                │
+                                ▼
+                     PyPDFLoader (Load PDF)
+                                │
+                                ▼
+            RecursiveCharacterTextSplitter
+                                │
+                                ▼
+      Ollama Embeddings (nomic-embed-text)
+                                │
+                                ▼
+                  Chroma Vector Database
+                                │
+                                ▼
+                 Similarity Search (k = 3)
+                                │
+                                ▼
+                 ChatOllama (gemma:2b)
+                                │
+                                ▼
+                      AI Generated Answer
+```
+
+---
+
+# Project Structure
+
+```
+Company-QA-Assistant/
+│
+├── app.py
+│
+├── rag/
+│   ├── loader.py
+│   ├── splitter.py
+│   ├── embeddings.py
+│   ├── vectorstore.py
+│   └── chat.py
+│
+├── templates/
+│   ├── index.html
+│   ├── chat.html
+│   ├── login.html
+│   ├── dashboard.html
+│   ├── upload.html
+│   ├── 404.html
+│   └── 500.html
+│
+├── static/
+│   ├── css/
+│   ├── js/
+│   └── images/
+│
+├── uploads/
+├── chroma_db/
+├── metadata.json
+├── requirements.txt
+└── README.md
+```
+
+---
+
+# Technologies Used
+
+- Python
+- Flask
+- LangChain
+- Ollama
+- ChromaDB
+- PyPDFLoader
+- RecursiveCharacterTextSplitter
+- Bootstrap 5
+- HTML
+- CSS
+- JavaScript
+
+---
+
+# How It Works
+
+1. Admin logs into the dashboard.
+2. Admin uploads a PDF document.
+3. Existing PDF (if any) is automatically deleted.
+4. PDF is loaded using **PyPDFLoader**.
+5. Document is split into chunks using **RecursiveCharacterTextSplitter**.
+6. Embeddings are generated using **nomic-embed-text**.
+7. Embeddings are stored in **ChromaDB**.
+8. Metadata is saved in **metadata.json**.
+9. Users can ask questions from the uploaded document.
+10. Relevant chunks are retrieved using semantic similarity search.
+11. **Gemma 2B** generates answers based only on retrieved context.
+
+---
+
+# Sample Chat Experience Look Like This
+
+<img width="950" height="674" alt="Screenshot 2026-09-10 115639" src="https://github.com/user-attachments/assets/848c6b5d-7c10-4ef6-a2f8-fe2f2fe64547" />
+
+
+---
+
+# Setup
+
+Create a virtual environment
 
 ```powershell
 python -m venv .venv
-.\.venv\Scripts\Activate.ps1
-python -m pip install -r requirements.txt
 ```
 
-Install Ollama, start it, and pull the exact models:
+Activate virtual environment
+
+```powershell
+.\.venv\Scripts\Activate.ps1
+```
+
+Install dependencies
+
+```powershell
+pip install -r requirements.txt
+```
+
+Install Ollama models
 
 ```powershell
 ollama pull nomic-embed-text
 ollama pull gemma:2b
 ```
 
-Run the app:
+Run Flask application
 
 ```powershell
 python app.py
 ```
 
-Open `http://127.0.0.1:5000`.
+Open
 
-## Admin demo credentials
+```
+http://127.0.0.1:5000
+```
 
-- Email: `user@123`
-- Password: `user@123`
+---
 
-## Document lifecycle
+# Admin Credentials
 
-Only PDF files up to 25 MB are accepted. The active source is stored in `uploads/`; uploading a new PDF removes the previous PDF. Its SHA-256 hash is compared with `metadata.json`. Matching content reuses the existing `chroma_db/` collection without regenerating embeddings. A changed PDF creates a fresh `company_documents` collection and updates metadata.
+Email
 
-The admin dashboard also supports rebuilding embeddings and deleting the complete knowledge base, including the PDF, Chroma collection, metadata, and session chat history.
+```
+user@123
+```
+
+Password
+
+```
+user@123
+```
+
+---
+
+# Document Lifecycle
+
+- Supports PDF files up to **25 MB**
+- Only one PDF is active at a time
+- Uploading a new PDF automatically removes the previous document
+- SHA-256 hash comparison prevents unnecessary embedding generation
+- Existing embeddings are reused whenever the uploaded file is unchanged
+- A new document automatically recreates the Chroma collection and updates metadata
+- Admin can rebuild embeddings or delete the complete knowledge base
+
+---
+
+# Future Improvements
+
+- Support DOCX and TXT documents
+- Streaming LLM responses
+- User authentication
+- Conversation memory
+- Multi-document knowledge base
+- Citation highlighting
+- Docker deployment
+- AWS deployment
+- Role-based access control
+
+---
+
+# Author
+
+**Rohit Bansode**
+
+GitHub: https://github.com/rsbansode2000
